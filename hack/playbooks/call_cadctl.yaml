@@ -1,0 +1,27 @@
+- hosts: localhost
+  connection: local
+  tasks:
+    - debug:
+        msg: "{{ payload }}"
+    - name: Create temporary file for payload
+      ansible.builtin.tempfile:
+        state: file
+        suffix: temp
+      register: tempfile
+    - debug:
+        msg: "{{ tempfile.path }}"
+    - name: Add Paylod to temporary file
+      copy:
+        dest: "{{ tempfile.path }}"
+        content: "{{ payload }}"
+    # cadctl takes the pagerduty payload as input
+    # see https://github.com/openshift/configuration-anomaly-detection/blob/main/CONTRIBUTING.md#testing
+    - name: Call cadctl
+      ansible.builtin.shell: cadctl investigate --payload-path {{ tempfile.path }}
+      register: cad_output
+    - debug:
+        msg: "{{ cad_output }}"
+    # adding a wait to simulate long execution. 
+    # this should help with 
+    - ansible.builtin.pause:
+        minutes: 5     

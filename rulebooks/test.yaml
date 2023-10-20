@@ -1,32 +1,20 @@
 ---
 - name: Listen for events on a webhook
   hosts: all
+  execution_strategy: parallel  # with this strategy, the alerts will be handled in //
+
   sources:
-    - dynatrace.eda.dt_esa_api:
-        dt_api_host: "https://abc.live.dynatrace.com"
-        dt_api_token: "asjfsjkfjfjh"
-        delay: 60 
+    - ansible.eda.webhook:
+        host: 0.0.0.0
+        port: 5000
 
-  Rules:
+  rules:
+    - name: pagerduty
+      # sends all pagerduty webhook calls to cadctl
+      condition: "1" == "1"
+      # condition: event.meta.headers == "PagerDuty-Webhook/V3.0"
+      actions:
+        - run_job_template:
+            name: Demo Job Template
+            organization: Default
 
-    - name: Problem payload Dynatrace for CPU issue
-      condition: event.payload.problemTitle contains "CPU saturation"
-      action:
-        run_job_template:
-          name: "Remediate CPU saturation issue"
-          organization: "Default"
-
-    - name: Problem payload Dynatrace for App Failure rate increase issue
-      condition: event.payload.problemTitle contains "Failure rate increase"
-      action:
-        run_job_template:
-          name: "Remediate Application issue"
-          organization: "Default"
-
-    - name: Update comments in Dynatrace
-      condition: 
-        all: 
-          - event.status == "OPEN"
-      action:
-        run_playbook:
-          name: dt-update-comments.yml

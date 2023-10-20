@@ -1,0 +1,4 @@
+pkg-config
+systemd-devel
+gcc
+python39-devel
