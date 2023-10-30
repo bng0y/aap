@@ -11,8 +11,7 @@
   rules:
     - name: pagerduty
       # sends all pagerduty webhook calls to cadctl
-      condition: "1" == "1"
-      # condition: event.meta.headers == "PagerDuty-Webhook/V3.0"
+      condition: True | bool
       actions:
         - run_job_template:
             name: Demo Job Template
